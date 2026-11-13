@@ -1,12 +1,12 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import ConfigDict, Field
+from pydantic import AwareDatetime, ConfigDict, Field
 
 from backend.common.schema import SchemaBase
 
 
-class FbaBuddyBillingLedgerQueryParam(SchemaBase):
+class AIBuddyBillingLedgerQueryParam(SchemaBase):
     """AI Buddy 用量账本查询参数"""
 
     user_id: int | None = Field(None, description='用户 ID')
@@ -14,11 +14,11 @@ class FbaBuddyBillingLedgerQueryParam(SchemaBase):
     provider_id: int | None = Field(None, description='供应商 ID')
     model_id: str | None = Field(None, description='模型 ID')
     status: str | None = Field(None, description='账本状态')
-    start_time: datetime | None = Field(None, description='开始时间')
-    end_time: datetime | None = Field(None, description='结束时间')
+    start_time: AwareDatetime | None = Field(None, description='开始时间，需携带时区偏移')
+    end_time: AwareDatetime | None = Field(None, description='结束时间，需携带时区偏移')
 
 
-class GetFbaBuddyBillingLedgerDetail(SchemaBase):
+class GetAIBuddyBillingLedgerDetail(SchemaBase):
     """AI Buddy 用量账本详情"""
 
     model_config = ConfigDict(from_attributes=True)
@@ -47,11 +47,12 @@ class GetFbaBuddyBillingLedgerDetail(SchemaBase):
     created_time: datetime = Field(description='创建时间')
 
 
-class GetFbaBuddyBillingSummaryDetail(SchemaBase):
+class GetAIBuddyBillingSummaryDetail(SchemaBase):
     """AI Buddy 计费汇总"""
 
     start_time: datetime | None = Field(None, description='开始时间')
     end_time: datetime | None = Field(None, description='结束时间')
+
     usage_count: int = Field(description='用量记录数')
     input_tokens: int = Field(description='输入 token 数')
     output_tokens: int = Field(description='输出 token 数')
@@ -62,7 +63,7 @@ class GetFbaBuddyBillingSummaryDetail(SchemaBase):
     billed_cost: Decimal = Field(description='结算费用')
 
 
-class GetFbaBuddyBillingReconcileDetail(SchemaBase):
+class GetAIBuddyBillingReconcileDetail(SchemaBase):
     """AI Buddy 计费归集结果"""
 
     processed: int = Field(description='扫描的消息数')
@@ -71,7 +72,7 @@ class GetFbaBuddyBillingReconcileDetail(SchemaBase):
     unpriced: int = Field(description='未定价的响应数')
 
 
-class CreateFbaBuddyBillingLedgerParam(SchemaBase):
+class CreateAIBuddyBillingLedgerParam(SchemaBase):
     """创建 AI Buddy 用量账本参数"""
 
     source_message_id: int = Field(description='AI Buddy 消息 ID')

@@ -10,3 +10,8 @@ depends_on = ["ai_buddy"]
 
 [app]
 router = ["v1"]
+
+[settings]
+AI_BUDDY_BILLING_BALANCE_GUARD_ENABLED = true
+AI_BUDDY_BILLING_BALANCE_MIN_USD = 0
+AI_BUDDY_BILLING_BALANCE_GUARD_SKIP_SUPERUSER = false

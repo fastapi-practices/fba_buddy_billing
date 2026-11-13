@@ -4,11 +4,11 @@ from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingTransaction
-from backend.plugin.fba_buddy_billing.schema.transaction import CreateFbaBuddyBillingTransactionParam
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingTransaction
+from backend.plugin.ai_buddy_billing.schema.transaction import CreateAIBuddyBillingTransactionParam
 
 
-class CRUDFbaBuddyBillingTransaction(CRUDPlus[FbaBuddyBillingTransaction]):
+class CRUDAIBuddyBillingTransaction(CRUDPlus[AIBuddyBillingTransaction]):
     """AI Buddy 计费流水数据库操作类"""
 
     async def get_select(
@@ -36,7 +36,7 @@ class CRUDFbaBuddyBillingTransaction(CRUDPlus[FbaBuddyBillingTransaction]):
             filters['created_time__le'] = end_time
         return await self.select_order('id', 'desc', **filters)
 
-    async def create(self, db: AsyncSession, obj: CreateFbaBuddyBillingTransactionParam) -> FbaBuddyBillingTransaction:
+    async def create(self, db: AsyncSession, obj: CreateAIBuddyBillingTransactionParam) -> AIBuddyBillingTransaction:
         """
         创建计费流水
 
@@ -47,6 +47,6 @@ class CRUDFbaBuddyBillingTransaction(CRUDPlus[FbaBuddyBillingTransaction]):
         return await self.create_model(db, obj, flush=True)
 
 
-fba_buddy_billing_transaction_dao: CRUDFbaBuddyBillingTransaction = CRUDFbaBuddyBillingTransaction(
-    FbaBuddyBillingTransaction
+ai_buddy_billing_transaction_dao: CRUDAIBuddyBillingTransaction = CRUDAIBuddyBillingTransaction(
+    AIBuddyBillingTransaction
 )

@@ -8,13 +8,13 @@ from backend.common.security.jwt import DependsJwtAuth
 from backend.common.security.permission import RequestPermission
 from backend.common.security.rbac import DependsRBAC
 from backend.database.db import CurrentSession, CurrentSessionTransaction
-from backend.plugin.fba_buddy_billing.schema.ledger import (
-    FbaBuddyBillingLedgerQueryParam,
-    GetFbaBuddyBillingLedgerDetail,
-    GetFbaBuddyBillingReconcileDetail,
-    GetFbaBuddyBillingSummaryDetail,
+from backend.plugin.ai_buddy_billing.schema.ledger import (
+    AIBuddyBillingLedgerQueryParam,
+    GetAIBuddyBillingLedgerDetail,
+    GetAIBuddyBillingReconcileDetail,
+    GetAIBuddyBillingSummaryDetail,
 )
-from backend.plugin.fba_buddy_billing.service.ledger_service import fba_buddy_billing_ledger_service
+from backend.plugin.ai_buddy_billing.service.ledger_service import ai_buddy_billing_ledger_service
 
 router = APIRouter()
 
@@ -27,13 +27,13 @@ router = APIRouter()
         DependsPagination,
     ],
 )
-async def get_fba_buddy_billing_ledgers_paginated(
+async def get_ai_buddy_billing_ledgers_paginated(
     request: Request,
     db: CurrentSession,
-    query: Annotated[FbaBuddyBillingLedgerQueryParam, Query()],
-) -> ResponseSchemaModel[PageData[GetFbaBuddyBillingLedgerDetail]]:
+    query: Annotated[AIBuddyBillingLedgerQueryParam, Query()],
+) -> ResponseSchemaModel[PageData[GetAIBuddyBillingLedgerDetail]]:
     user_id = query.user_id if request.user.is_superuser else request.user.id
-    data = await fba_buddy_billing_ledger_service.get_list(
+    data = await ai_buddy_billing_ledger_service.get_list(
         db=db,
         user_id=user_id,
         conversation_id=query.conversation_id,
@@ -47,13 +47,13 @@ async def get_fba_buddy_billing_ledgers_paginated(
 
 
 @router.get('/summary', summary='获取 AI Buddy 用量汇总', dependencies=[DependsJwtAuth])
-async def get_fba_buddy_billing_summary(
+async def get_ai_buddy_billing_summary(
     request: Request,
     db: CurrentSession,
-    query: Annotated[FbaBuddyBillingLedgerQueryParam, Query()],
-) -> ResponseSchemaModel[GetFbaBuddyBillingSummaryDetail]:
+    query: Annotated[AIBuddyBillingLedgerQueryParam, Query()],
+) -> ResponseSchemaModel[GetAIBuddyBillingSummaryDetail]:
     user_id = query.user_id if request.user.is_superuser else request.user.id
-    data = await fba_buddy_billing_ledger_service.get_summary(
+    data = await ai_buddy_billing_ledger_service.get_summary(
         db=db,
         user_id=user_id,
         start_time=query.start_time,
@@ -70,8 +70,8 @@ async def get_fba_buddy_billing_summary(
         DependsRBAC,
     ],
 )
-async def reconcile_fba_buddy_billing(
+async def reconcile_ai_buddy_billing(
     db: CurrentSessionTransaction,
-) -> ResponseSchemaModel[GetFbaBuddyBillingReconcileDetail]:
-    data = await fba_buddy_billing_ledger_service.reconcile(db=db)
+) -> ResponseSchemaModel[GetAIBuddyBillingReconcileDetail]:
+    data = await ai_buddy_billing_ledger_service.reconcile(db=db)
     return response_base.success(data=data)

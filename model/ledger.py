@@ -8,16 +8,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 from backend.common.model import Base, id_key
 
 
-class FbaBuddyBillingLedger(Base):
+class AIBuddyBillingLedger(Base):
     """AI Buddy 用量账本表"""
 
-    __tablename__ = 'fba_buddy_billing_ledger'
+    __tablename__ = 'ai_buddy_billing_ledger'
     __table_args__ = (
         sa.UniqueConstraint(
             'source_message_id',
             'source_response_index',
             'deleted',
-            name='uk_fba_buddy_billing_ledger_source_response_deleted',
+            name='uk_ai_buddy_billing_ledger_source_response_deleted',
         ),
         {'comment': 'AI Buddy 用量账本'},
     )

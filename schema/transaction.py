@@ -1,21 +1,21 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import ConfigDict, Field
+from pydantic import AwareDatetime, ConfigDict, Field
 
 from backend.common.schema import SchemaBase
 
 
-class FbaBuddyBillingTransactionQueryParam(SchemaBase):
+class AIBuddyBillingTransactionQueryParam(SchemaBase):
     """AI Buddy 计费流水查询参数"""
 
     user_id: int | None = Field(None, description='用户 ID')
     transaction_type: str | None = Field(None, description='流水类型')
-    start_time: datetime | None = Field(None, description='开始时间')
-    end_time: datetime | None = Field(None, description='结束时间')
+    start_time: AwareDatetime | None = Field(None, description='开始时间，需携带时区偏移')
+    end_time: AwareDatetime | None = Field(None, description='结束时间，需携带时区偏移')
 
 
-class GetFbaBuddyBillingTransactionDetail(SchemaBase):
+class GetAIBuddyBillingTransactionDetail(SchemaBase):
     """AI Buddy 计费流水详情"""
 
     model_config = ConfigDict(from_attributes=True)
@@ -33,7 +33,7 @@ class GetFbaBuddyBillingTransactionDetail(SchemaBase):
     created_time: datetime = Field(description='创建时间')
 
 
-class CreateFbaBuddyBillingTransactionParam(SchemaBase):
+class CreateAIBuddyBillingTransactionParam(SchemaBase):
     """创建 AI Buddy 计费流水参数"""
 
     account_id: int = Field(description='账户 ID')

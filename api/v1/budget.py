@@ -8,13 +8,13 @@ from backend.common.security.jwt import DependsJwtAuth
 from backend.common.security.permission import RequestPermission
 from backend.common.security.rbac import DependsRBAC
 from backend.database.db import CurrentSession, CurrentSessionTransaction
-from backend.plugin.fba_buddy_billing.schema.budget import (
-    CreateFbaBuddyBillingBudgetParam,
-    FbaBuddyBillingBudgetQueryParam,
-    GetFbaBuddyBillingBudgetDetail,
-    UpdateFbaBuddyBillingBudgetParam,
+from backend.plugin.ai_buddy_billing.schema.budget import (
+    AIBuddyBillingBudgetQueryParam,
+    CreateAIBuddyBillingBudgetParam,
+    GetAIBuddyBillingBudgetDetail,
+    UpdateAIBuddyBillingBudgetParam,
 )
-from backend.plugin.fba_buddy_billing.service.budget_service import fba_buddy_billing_budget_service
+from backend.plugin.ai_buddy_billing.service.budget_service import ai_buddy_billing_budget_service
 
 router = APIRouter()
 
@@ -27,13 +27,13 @@ router = APIRouter()
         DependsPagination,
     ],
 )
-async def get_fba_buddy_billing_budgets_paginated(
+async def get_ai_buddy_billing_budgets_paginated(
     request: Request,
     db: CurrentSession,
-    query: Annotated[FbaBuddyBillingBudgetQueryParam, Query()],
-) -> ResponseSchemaModel[PageData[GetFbaBuddyBillingBudgetDetail]]:
+    query: Annotated[AIBuddyBillingBudgetQueryParam, Query()],
+) -> ResponseSchemaModel[PageData[GetAIBuddyBillingBudgetDetail]]:
     user_id = query.user_id if request.user.is_superuser else request.user.id
-    data = await fba_buddy_billing_budget_service.get_list(
+    data = await ai_buddy_billing_budget_service.get_list(
         db=db,
         user_id=user_id,
         window=query.window,
@@ -50,11 +50,11 @@ async def get_fba_buddy_billing_budgets_paginated(
         DependsRBAC,
     ],
 )
-async def create_fba_buddy_billing_budget(
+async def create_ai_buddy_billing_budget(
     db: CurrentSessionTransaction,
-    obj: CreateFbaBuddyBillingBudgetParam,
-) -> ResponseSchemaModel[GetFbaBuddyBillingBudgetDetail]:
-    data = await fba_buddy_billing_budget_service.create(db=db, obj=obj)
+    obj: CreateAIBuddyBillingBudgetParam,
+) -> ResponseSchemaModel[GetAIBuddyBillingBudgetDetail]:
+    data = await ai_buddy_billing_budget_service.create(db=db, obj=obj)
     return response_base.success(data=data)
 
 
@@ -66,12 +66,12 @@ async def create_fba_buddy_billing_budget(
         DependsRBAC,
     ],
 )
-async def update_fba_buddy_billing_budget(
+async def update_ai_buddy_billing_budget(
     db: CurrentSessionTransaction,
     pk: Annotated[int, Path(description='预算 ID')],
-    obj: UpdateFbaBuddyBillingBudgetParam,
-) -> ResponseSchemaModel[GetFbaBuddyBillingBudgetDetail]:
-    data = await fba_buddy_billing_budget_service.update(db=db, pk=pk, obj=obj)
+    obj: UpdateAIBuddyBillingBudgetParam,
+) -> ResponseSchemaModel[GetAIBuddyBillingBudgetDetail]:
+    data = await ai_buddy_billing_budget_service.update(db=db, pk=pk, obj=obj)
     return response_base.success(data=data)
 
 
@@ -83,9 +83,9 @@ async def update_fba_buddy_billing_budget(
         DependsRBAC,
     ],
 )
-async def delete_fba_buddy_billing_budget(
+async def delete_ai_buddy_billing_budget(
     db: CurrentSessionTransaction,
     pk: Annotated[int, Path(description='预算 ID')],
 ) -> ResponseModel:
-    await fba_buddy_billing_budget_service.delete(db=db, pk=pk)
+    await ai_buddy_billing_budget_service.delete(db=db, pk=pk)
     return response_base.success()

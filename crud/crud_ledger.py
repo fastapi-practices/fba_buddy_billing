@@ -6,12 +6,22 @@ from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingLedger
-from backend.plugin.fba_buddy_billing.schema.ledger import CreateFbaBuddyBillingLedgerParam
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingLedger
+from backend.plugin.ai_buddy_billing.schema.ledger import CreateAIBuddyBillingLedgerParam
 
 
-class CRUDFbaBuddyBillingLedger(CRUDPlus[FbaBuddyBillingLedger]):
+class CRUDAIBuddyBillingLedger(CRUDPlus[AIBuddyBillingLedger]):
     """AI Buddy 用量账本数据库操作类"""
+
+    async def get_by_price(self, db: AsyncSession, price_id: int) -> AIBuddyBillingLedger | None:
+        """
+        获取使用指定价格的账本记录
+
+        :param db: 数据库会话
+        :param price_id: 价格 ID
+        :return:
+        """
+        return await self.select_model_by_column(db, price_id=price_id, deleted=0)
 
     async def get_select(
         self,
@@ -92,7 +102,7 @@ class CRUDFbaBuddyBillingLedger(CRUDPlus[FbaBuddyBillingLedger]):
             'billed_cost': row[7],
         }
 
-    async def create(self, db: AsyncSession, obj: CreateFbaBuddyBillingLedgerParam) -> FbaBuddyBillingLedger:
+    async def create(self, db: AsyncSession, obj: CreateAIBuddyBillingLedgerParam) -> AIBuddyBillingLedger:
         """
         创建账本记录
 
@@ -103,4 +113,4 @@ class CRUDFbaBuddyBillingLedger(CRUDPlus[FbaBuddyBillingLedger]):
         return await self.create_model(db, obj, flush=True)
 
 
-fba_buddy_billing_ledger_dao: CRUDFbaBuddyBillingLedger = CRUDFbaBuddyBillingLedger(FbaBuddyBillingLedger)
+ai_buddy_billing_ledger_dao: CRUDAIBuddyBillingLedger = CRUDAIBuddyBillingLedger(AIBuddyBillingLedger)

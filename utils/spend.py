@@ -6,8 +6,8 @@ from pydantic_ai.tools import RunContext
 from pydantic_ai_harness.spend import Budget, PriceFunc
 
 from backend.plugin.ai_buddy.dataclasses import ChatAgentDeps
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingBudget, FbaBuddyBillingPrice
-from backend.plugin.fba_buddy_billing.utils.usage import BillingUsageRecord, calculate_token_cost
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingBudget, AIBuddyBillingPrice
+from backend.plugin.ai_buddy_billing.utils.usage import BillingUsageRecord, calculate_token_cost
 
 
 def _user_scope(ctx: RunContext[ChatAgentDeps]) -> str:
@@ -15,7 +15,7 @@ def _user_scope(ctx: RunContext[ChatAgentDeps]) -> str:
     return f'user:{ctx.deps.user_id}'
 
 
-def build_spend_budgets(*, budgets: Sequence[FbaBuddyBillingBudget]) -> tuple[Budget[ChatAgentDeps], ...]:
+def build_spend_budgets(*, budgets: Sequence[AIBuddyBillingBudget]) -> tuple[Budget[ChatAgentDeps], ...]:
     """
     将计费预算转换为 Harness 预算
 
@@ -37,7 +37,7 @@ def build_spend_budgets(*, budgets: Sequence[FbaBuddyBillingBudget]) -> tuple[Bu
 
 def build_spend_price(
     *,
-    prices: Sequence[FbaBuddyBillingPrice],
+    prices: Sequence[AIBuddyBillingPrice],
     primary_model_id: str | None,
 ) -> PriceFunc | None:
     """
@@ -47,7 +47,7 @@ def build_spend_price(
     :param primary_model_id: 本轮主模型 ID
     :return:
     """
-    price_by_model: dict[str, FbaBuddyBillingPrice] = {}
+    price_by_model: dict[str, AIBuddyBillingPrice] = {}
     ambiguous: set[str] = set()
     for price in prices:
         if price.model_id == primary_model_id:

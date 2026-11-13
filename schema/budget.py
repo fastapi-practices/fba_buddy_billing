@@ -6,29 +6,29 @@ from pydantic import ConfigDict, Field, model_validator
 
 from backend.common.enums import StatusType
 from backend.common.schema import SchemaBase
-from backend.plugin.fba_buddy_billing.enums import FbaBuddyBillingBudgetWindow
+from backend.plugin.ai_buddy_billing.enums import AIBuddyBillingBudgetWindow
 
 
-class FbaBuddyBillingBudgetQueryParam(SchemaBase):
+class AIBuddyBillingBudgetQueryParam(SchemaBase):
     """AI Buddy 计费预算查询参数"""
 
     user_id: int | None = Field(None, description='用户 ID')
-    window: FbaBuddyBillingBudgetWindow | None = Field(None, description='预算窗口')
+    window: AIBuddyBillingBudgetWindow | None = Field(None, description='预算窗口')
     status: StatusType | None = Field(None, description='状态')
 
 
-class FbaBuddyBillingBudgetSchemaBase(SchemaBase):
+class AIBuddyBillingBudgetSchemaBase(SchemaBase):
     """AI Buddy 计费预算基础模型"""
 
     user_id: int = Field(description='用户 ID')
-    window: FbaBuddyBillingBudgetWindow = Field(description='预算窗口')
+    window: AIBuddyBillingBudgetWindow = Field(description='预算窗口')
     usd_limit: Decimal | None = Field(None, gt=0, description='USD 上限')
     token_limit: int | None = Field(None, gt=0, description='token 总量上限')
     warn_at: float | None = Field(None, gt=0, le=1, description='预警比例')
     status: StatusType = Field(default=StatusType.enable, description='状态')
 
 
-class CreateFbaBuddyBillingBudgetParam(FbaBuddyBillingBudgetSchemaBase):
+class CreateAIBuddyBillingBudgetParam(AIBuddyBillingBudgetSchemaBase):
     """创建 AI Buddy 计费预算参数"""
 
     @model_validator(mode='after')
@@ -39,7 +39,7 @@ class CreateFbaBuddyBillingBudgetParam(FbaBuddyBillingBudgetSchemaBase):
         return self
 
 
-class UpdateFbaBuddyBillingBudgetParam(SchemaBase):
+class UpdateAIBuddyBillingBudgetParam(SchemaBase):
     """更新 AI Buddy 计费预算参数"""
 
     usd_limit: Decimal | None = Field(None, gt=0, description='USD 上限')
@@ -48,7 +48,7 @@ class UpdateFbaBuddyBillingBudgetParam(SchemaBase):
     status: StatusType | None = Field(None, description='状态')
 
 
-class GetFbaBuddyBillingBudgetDetail(FbaBuddyBillingBudgetSchemaBase):
+class GetAIBuddyBillingBudgetDetail(AIBuddyBillingBudgetSchemaBase):
     """AI Buddy 计费预算详情"""
 
     model_config = ConfigDict(from_attributes=True)

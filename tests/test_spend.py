@@ -6,15 +6,15 @@ import pytest
 from pydantic import ValidationError
 from pydantic_ai.messages import ModelResponse, RequestUsage, TextPart
 
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingBudget, FbaBuddyBillingPrice
-from backend.plugin.fba_buddy_billing.schema.budget import CreateFbaBuddyBillingBudgetParam
-from backend.plugin.fba_buddy_billing.utils.spend import build_spend_budgets, build_spend_price
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingBudget, AIBuddyBillingPrice
+from backend.plugin.ai_buddy_billing.schema.budget import CreateAIBuddyBillingBudgetParam
+from backend.plugin.ai_buddy_billing.utils.spend import build_spend_budgets, build_spend_price
 
 
 def test_build_spend_budgets() -> None:
     budgets = build_spend_budgets(
         budgets=[
-            FbaBuddyBillingBudget(
+            AIBuddyBillingBudget(
                 user_id=1,
                 window='day',
                 usd_limit=Decimal(10),
@@ -31,7 +31,7 @@ def test_build_spend_budgets() -> None:
 
 
 def test_build_spend_price() -> None:
-    price = FbaBuddyBillingPrice(
+    price = AIBuddyBillingPrice(
         provider_id=1,
         model_id='demo',
         effective_from=datetime(2026, 1, 1, tzinfo=UTC),
@@ -50,4 +50,4 @@ def test_build_spend_price() -> None:
 
 def test_budget_requires_limit() -> None:
     with pytest.raises(ValidationError):
-        CreateFbaBuddyBillingBudgetParam(user_id=1, window='day')
+        CreateAIBuddyBillingBudgetParam(user_id=1, window='day')

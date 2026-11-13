@@ -7,16 +7,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 from backend.common.model import Base, id_key
 
 
-class FbaBuddyBillingTransaction(Base):
+class AIBuddyBillingTransaction(Base):
     """AI Buddy 计费账户流水表"""
 
-    __tablename__ = 'fba_buddy_billing_transaction'
+    __tablename__ = 'ai_buddy_billing_transaction'
     __table_args__ = (
         sa.UniqueConstraint(
             'reference_type',
             'reference_id',
             'deleted',
-            name='uk_fba_buddy_billing_transaction_reference_deleted',
+            name='uk_ai_buddy_billing_transaction_reference_deleted',
         ),
         {'comment': 'AI Buddy 计费账户流水'},
     )

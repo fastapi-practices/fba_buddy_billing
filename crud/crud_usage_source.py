@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
 from backend.plugin.ai_buddy.model import AIBuddyConversation, AIBuddyMessage
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingLedger
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingLedger
 
 
-class CRUDFbaBuddyBillingUsageSource(CRUDPlus[AIBuddyMessage]):
+class CRUDAIBuddyBillingUsageSource(CRUDPlus[AIBuddyMessage]):
     """AI Buddy 用量来源查询类"""
 
     async def get_list(self, db: AsyncSession, *, limit: int) -> list[tuple[AIBuddyMessage, int]]:
@@ -17,9 +17,9 @@ class CRUDFbaBuddyBillingUsageSource(CRUDPlus[AIBuddyMessage]):
         :param limit: 单次扫描数量
         :return:
         """
-        processed = select(FbaBuddyBillingLedger.id).where(
-            FbaBuddyBillingLedger.source_message_id == self.model.id,
-            FbaBuddyBillingLedger.deleted == 0,
+        processed = select(AIBuddyBillingLedger.id).where(
+            AIBuddyBillingLedger.source_message_id == self.model.id,
+            AIBuddyBillingLedger.deleted == 0,
         )
         stmt = (
             select(AIBuddyMessage, AIBuddyConversation.user_id)
@@ -36,4 +36,4 @@ class CRUDFbaBuddyBillingUsageSource(CRUDPlus[AIBuddyMessage]):
         return list((await db.execute(stmt)).all())
 
 
-fba_buddy_billing_usage_source_dao: CRUDFbaBuddyBillingUsageSource = CRUDFbaBuddyBillingUsageSource(AIBuddyMessage)
+ai_buddy_billing_usage_source_dao: CRUDAIBuddyBillingUsageSource = CRUDAIBuddyBillingUsageSource(AIBuddyMessage)

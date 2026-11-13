@@ -1,16 +1,27 @@
 from collections.abc import Sequence
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import Select, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingPrice
-from backend.plugin.fba_buddy_billing.schema.price import CreateFbaBuddyBillingPriceParam
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingPrice
+from backend.plugin.ai_buddy_billing.schema.price import CreateAIBuddyBillingPriceParam
 
 
-class CRUDFbaBuddyBillingPrice(CRUDPlus[FbaBuddyBillingPrice]):
+class CRUDAIBuddyBillingPrice(CRUDPlus[AIBuddyBillingPrice]):
     """AI Buddy 计费价格数据库操作类"""
+
+    async def get(self, db: AsyncSession, pk: int) -> AIBuddyBillingPrice | None:
+        """
+        获取价格记录
+
+        :param db: 数据库会话
+        :param pk: 价格 ID
+        :return:
+        """
+        return await self.select_model(db, pk, deleted=0)
 
     async def get_select(
         self,
@@ -55,7 +66,7 @@ class CRUDFbaBuddyBillingPrice(CRUDPlus[FbaBuddyBillingPrice]):
         provider_id: int,
         model_id: str,
         effective_time: datetime,
-    ) -> FbaBuddyBillingPrice | None:
+    ) -> AIBuddyBillingPrice | None:
         """
         获取指定时间生效的价格
 
@@ -85,7 +96,7 @@ class CRUDFbaBuddyBillingPrice(CRUDPlus[FbaBuddyBillingPrice]):
         provider_id: int | None = None,
         model_id: str | None = None,
         effective_time: datetime | None = None,
-    ) -> Sequence[FbaBuddyBillingPrice]:
+    ) -> Sequence[AIBuddyBillingPrice]:
         """
         获取当前生效的价格列表
 
@@ -143,7 +154,18 @@ class CRUDFbaBuddyBillingPrice(CRUDPlus[FbaBuddyBillingPrice]):
             .values(effective_to=effective_time)
         )
 
-    async def create(self, db: AsyncSession, obj: CreateFbaBuddyBillingPriceParam) -> FbaBuddyBillingPrice:
+    async def update(self, db: AsyncSession, *, pk: int, values: dict[str, Any]) -> int:
+        """
+        更新价格记录
+
+        :param db: 数据库会话
+        :param pk: 价格 ID
+        :param values: 更新字段
+        :return:
+        """
+        return await self.update_model_by_column(db, values, id=pk, deleted=0)
+
+    async def create(self, db: AsyncSession, obj: CreateAIBuddyBillingPriceParam) -> AIBuddyBillingPrice:
         """
         创建价格记录
 
@@ -154,4 +176,4 @@ class CRUDFbaBuddyBillingPrice(CRUDPlus[FbaBuddyBillingPrice]):
         return await self.create_model(db, obj, flush=True)
 
 
-fba_buddy_billing_price_dao: CRUDFbaBuddyBillingPrice = CRUDFbaBuddyBillingPrice(FbaBuddyBillingPrice)
+ai_buddy_billing_price_dao: CRUDAIBuddyBillingPrice = CRUDAIBuddyBillingPrice(AIBuddyBillingPrice)

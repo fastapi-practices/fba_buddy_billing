@@ -10,15 +10,15 @@ from backend.common.pagination import paging_data
 from backend.core.conf import settings
 from backend.database.redis import redis_client
 from backend.plugin.ai_buddy.dataclasses import CapabilityContext, CapabilityResult
-from backend.plugin.fba_buddy_billing.crud.crud_budget import fba_buddy_billing_budget_dao
-from backend.plugin.fba_buddy_billing.crud.crud_price import fba_buddy_billing_price_dao
-from backend.plugin.fba_buddy_billing.enums import FbaBuddyBillingBudgetWindow
-from backend.plugin.fba_buddy_billing.schema.budget import (
-    CreateFbaBuddyBillingBudgetParam,
-    GetFbaBuddyBillingBudgetDetail,
-    UpdateFbaBuddyBillingBudgetParam,
+from backend.plugin.ai_buddy_billing.crud.crud_budget import ai_buddy_billing_budget_dao
+from backend.plugin.ai_buddy_billing.crud.crud_price import ai_buddy_billing_price_dao
+from backend.plugin.ai_buddy_billing.enums import AIBuddyBillingBudgetWindow
+from backend.plugin.ai_buddy_billing.schema.budget import (
+    CreateAIBuddyBillingBudgetParam,
+    GetAIBuddyBillingBudgetDetail,
+    UpdateAIBuddyBillingBudgetParam,
 )
-from backend.plugin.fba_buddy_billing.utils.spend import build_spend_budgets, build_spend_price
+from backend.plugin.ai_buddy_billing.utils.spend import build_spend_budgets, build_spend_price
 from backend.utils.timezone import timezone
 
 _SPEND_STORE = RedisSpendStore(
@@ -27,7 +27,7 @@ _SPEND_STORE = RedisSpendStore(
 )
 
 
-class FbaBuddyBillingBudgetService:
+class AIBuddyBillingBudgetService:
     """AI Buddy 计费预算服务类"""
 
     @staticmethod
@@ -35,7 +35,7 @@ class FbaBuddyBillingBudgetService:
         *,
         db: AsyncSession,
         user_id: int | None,
-        window: FbaBuddyBillingBudgetWindow | None,
+        window: AIBuddyBillingBudgetWindow | None,
         status: StatusType | None,
     ) -> dict[str, Any]:
         """
@@ -47,7 +47,7 @@ class FbaBuddyBillingBudgetService:
         :param status: 状态
         :return:
         """
-        stmt = await fba_buddy_billing_budget_dao.get_select(
+        stmt = await ai_buddy_billing_budget_dao.get_select(
             user_id=user_id,
             window=window.value if window is not None else None,
             status=status.value if status is not None else None,
@@ -55,8 +55,8 @@ class FbaBuddyBillingBudgetService:
         return await paging_data(db, stmt)
 
     async def create(
-        self, *, db: AsyncSession, obj: CreateFbaBuddyBillingBudgetParam
-    ) -> GetFbaBuddyBillingBudgetDetail:
+        self, *, db: AsyncSession, obj: CreateAIBuddyBillingBudgetParam
+    ) -> GetAIBuddyBillingBudgetDetail:
         """
         创建计费预算
 
@@ -65,23 +65,23 @@ class FbaBuddyBillingBudgetService:
         :return:
         """
         self._validate_limits(usd_limit=obj.usd_limit, token_limit=obj.token_limit)
-        existing = await fba_buddy_billing_budget_dao.get_by_user_window(
+        existing = await ai_buddy_billing_budget_dao.get_by_user_window(
             db,
             user_id=obj.user_id,
             window=obj.window.value,
         )
         if existing is not None:
             raise errors.ConflictError(msg='该用户和预算窗口已存在配置')
-        row = await fba_buddy_billing_budget_dao.create(db, obj)
-        return GetFbaBuddyBillingBudgetDetail.model_validate(row)
+        row = await ai_buddy_billing_budget_dao.create(db, obj)
+        return GetAIBuddyBillingBudgetDetail.model_validate(row)
 
     async def update(
         self,
         *,
         db: AsyncSession,
         pk: int,
-        obj: UpdateFbaBuddyBillingBudgetParam,
-    ) -> GetFbaBuddyBillingBudgetDetail:
+        obj: UpdateAIBuddyBillingBudgetParam,
+    ) -> GetAIBuddyBillingBudgetDetail:
         """
         更新计费预算
 
@@ -90,7 +90,7 @@ class FbaBuddyBillingBudgetService:
         :param obj: 更新参数
         :return:
         """
-        current = await fba_buddy_billing_budget_dao.get(db, pk)
+        current = await ai_buddy_billing_budget_dao.get(db, pk)
         if current is None:
             raise errors.NotFoundError(msg='计费预算不存在')
         payload = obj.model_dump(exclude_unset=True)
@@ -104,8 +104,8 @@ class FbaBuddyBillingBudgetService:
         token_limit = values.get('token_limit', current.token_limit)
         self._validate_limits(usd_limit=usd_limit, token_limit=token_limit)
         if values:
-            await fba_buddy_billing_budget_dao.update(db, pk=pk, values=values)
-        return GetFbaBuddyBillingBudgetDetail.model_validate(await fba_buddy_billing_budget_dao.get(db, pk))
+            await ai_buddy_billing_budget_dao.update(db, pk=pk, values=values)
+        return GetAIBuddyBillingBudgetDetail.model_validate(await ai_buddy_billing_budget_dao.get(db, pk))
 
     @staticmethod
     async def delete(*, db: AsyncSession, pk: int) -> int:
@@ -116,7 +116,7 @@ class FbaBuddyBillingBudgetService:
         :param pk: 预算 ID
         :return:
         """
-        count = await fba_buddy_billing_budget_dao.delete(db, pk=pk)
+        count = await ai_buddy_billing_budget_dao.delete(db, pk=pk)
         if not count:
             raise errors.NotFoundError(msg='计费预算不存在')
         return count
@@ -131,10 +131,10 @@ class FbaBuddyBillingBudgetService:
         """
         if ctx.user_id is None:
             return CapabilityResult(capability=None)
-        budgets = await fba_buddy_billing_budget_dao.get_all_by_user(db=ctx.db, user_id=ctx.user_id)
+        budgets = await ai_buddy_billing_budget_dao.get_all_by_user(db=ctx.db, user_id=ctx.user_id)
         if not budgets:
             return CapabilityResult(capability=None)
-        prices = await fba_buddy_billing_price_dao.get_all_active(db=ctx.db, effective_time=timezone.now())
+        prices = await ai_buddy_billing_price_dao.get_all_active(db=ctx.db, effective_time=timezone.now())
         primary_model_id = getattr(ctx.forwarded_props, 'model_id', None)
         return CapabilityResult(
             capability=SpendLimits(
@@ -158,4 +158,4 @@ class FbaBuddyBillingBudgetService:
             raise errors.RequestError(msg='USD 和 token 上限至少配置一个')
 
 
-fba_buddy_billing_budget_service: FbaBuddyBillingBudgetService = FbaBuddyBillingBudgetService()
+ai_buddy_billing_budget_service: AIBuddyBillingBudgetService = AIBuddyBillingBudgetService()

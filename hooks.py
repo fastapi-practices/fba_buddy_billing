@@ -8,8 +8,9 @@ from fastapi import FastAPI
 from backend.common.log import log
 from backend.database.db import async_db_session
 from backend.plugin.ai_buddy.agent.capabilities.extensions import register_ai_buddy_capability_builder
-from backend.plugin.fba_buddy_billing.service.budget_service import fba_buddy_billing_budget_service
-from backend.plugin.fba_buddy_billing.service.ledger_service import fba_buddy_billing_ledger_service
+from backend.plugin.ai_buddy_billing.service.account_service import ai_buddy_billing_account_service
+from backend.plugin.ai_buddy_billing.service.budget_service import ai_buddy_billing_budget_service
+from backend.plugin.ai_buddy_billing.service.ledger_service import ai_buddy_billing_ledger_service
 
 _RECONCILE_INTERVAL_SECONDS = 60
 
@@ -19,7 +20,7 @@ async def _reconcile_loop() -> None:
     while True:
         try:
             async with async_db_session.begin() as db:
-                result = await fba_buddy_billing_ledger_service.reconcile(db=db)
+                result = await ai_buddy_billing_ledger_service.reconcile(db=db)
             if result.recorded:
                 log.info(f'AI Buddy 计费归集完成 recorded={result.recorded} billed={result.billed}')
         except asyncio.CancelledError:
@@ -37,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     :param app: FastAPI 应用
     :return:
     """
-    task = asyncio.create_task(_reconcile_loop(), name='fba-buddy-billing-reconciler')
+    task = asyncio.create_task(_reconcile_loop(), name='ai-buddy-billing-reconciler')
     try:
         yield
     finally:
@@ -52,5 +53,6 @@ def setup(app: FastAPI) -> None:
     :param app: FastAPI 应用
     :return:
     """
-    app.state.fba_buddy_billing_reconcile_interval = _RECONCILE_INTERVAL_SECONDS
-    register_ai_buddy_capability_builder(fba_buddy_billing_budget_service.build_spend_limits)
+    app.state.ai_buddy_billing_reconcile_interval = _RECONCILE_INTERVAL_SECONDS
+    register_ai_buddy_capability_builder(ai_buddy_billing_account_service.build_balance_guard)
+    register_ai_buddy_capability_builder(ai_buddy_billing_budget_service.build_spend_limits)

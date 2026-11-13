@@ -1,7 +1,7 @@
 from backend.common.enums import StrEnum
 
 
-class FbaBuddyBillingTransactionType(StrEnum):
+class AIBuddyBillingTransactionType(StrEnum):
     """AI Buddy 计费账户流水类型"""
 
     recharge = 'recharge'
@@ -10,7 +10,7 @@ class FbaBuddyBillingTransactionType(StrEnum):
     refund = 'refund'
 
 
-class FbaBuddyBillingLedgerStatus(StrEnum):
+class AIBuddyBillingLedgerStatus(StrEnum):
     """AI Buddy 计费账本状态"""
 
     billed = 'billed'
@@ -18,7 +18,7 @@ class FbaBuddyBillingLedgerStatus(StrEnum):
     unpriced = 'unpriced'
 
 
-class FbaBuddyBillingBudgetWindow(StrEnum):
+class AIBuddyBillingBudgetWindow(StrEnum):
     """AI Buddy 计费预算窗口"""
 
     run = 'run'

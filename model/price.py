@@ -8,17 +8,17 @@ from sqlalchemy.orm import Mapped, mapped_column
 from backend.common.model import Base, id_key
 
 
-class FbaBuddyBillingPrice(Base):
+class AIBuddyBillingPrice(Base):
     """AI Buddy 模型价格表"""
 
-    __tablename__ = 'fba_buddy_billing_price'
+    __tablename__ = 'ai_buddy_billing_price'
     __table_args__ = (
         sa.UniqueConstraint(
             'provider_id',
             'model_id',
             'effective_from',
             'deleted',
-            name='uk_fba_buddy_billing_price_provider_model_effective_deleted',
+            name='uk_ai_buddy_billing_price_provider_model_effective_deleted',
         ),
         {'comment': 'AI Buddy 模型价格'},
     )

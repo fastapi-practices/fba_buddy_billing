@@ -6,24 +6,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.common.exception import errors
 from backend.common.pagination import paging_data
-from backend.plugin.fba_buddy_billing.crud.crud_account import fba_buddy_billing_account_dao
-from backend.plugin.fba_buddy_billing.crud.crud_ledger import fba_buddy_billing_ledger_dao
-from backend.plugin.fba_buddy_billing.crud.crud_price import fba_buddy_billing_price_dao
-from backend.plugin.fba_buddy_billing.crud.crud_transaction import fba_buddy_billing_transaction_dao
-from backend.plugin.fba_buddy_billing.crud.crud_usage_source import fba_buddy_billing_usage_source_dao
-from backend.plugin.fba_buddy_billing.enums import FbaBuddyBillingLedgerStatus, FbaBuddyBillingTransactionType
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingLedger, FbaBuddyBillingPrice
-from backend.plugin.fba_buddy_billing.schema.account import CreateFbaBuddyBillingAccountParam
-from backend.plugin.fba_buddy_billing.schema.ledger import (
-    CreateFbaBuddyBillingLedgerParam,
-    GetFbaBuddyBillingReconcileDetail,
-    GetFbaBuddyBillingSummaryDetail,
+from backend.plugin.ai_buddy_billing.crud.crud_account import ai_buddy_billing_account_dao
+from backend.plugin.ai_buddy_billing.crud.crud_ledger import ai_buddy_billing_ledger_dao
+from backend.plugin.ai_buddy_billing.crud.crud_price import ai_buddy_billing_price_dao
+from backend.plugin.ai_buddy_billing.crud.crud_transaction import ai_buddy_billing_transaction_dao
+from backend.plugin.ai_buddy_billing.crud.crud_usage_source import ai_buddy_billing_usage_source_dao
+from backend.plugin.ai_buddy_billing.enums import AIBuddyBillingLedgerStatus, AIBuddyBillingTransactionType
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingLedger, AIBuddyBillingPrice
+from backend.plugin.ai_buddy_billing.schema.account import CreateAIBuddyBillingAccountParam
+from backend.plugin.ai_buddy_billing.schema.ledger import (
+    CreateAIBuddyBillingLedgerParam,
+    GetAIBuddyBillingReconcileDetail,
+    GetAIBuddyBillingSummaryDetail,
 )
-from backend.plugin.fba_buddy_billing.schema.transaction import CreateFbaBuddyBillingTransactionParam
-from backend.plugin.fba_buddy_billing.utils.usage import BillingUsageRecord, calculate_token_cost, extract_usage_records
+from backend.plugin.ai_buddy_billing.schema.transaction import CreateAIBuddyBillingTransactionParam
+from backend.plugin.ai_buddy_billing.utils.usage import BillingUsageRecord, calculate_token_cost, extract_usage_records
 
 
-class FbaBuddyBillingLedgerService:
+class AIBuddyBillingLedgerService:
     """AI Buddy 用量账本服务类"""
 
     @staticmethod
@@ -53,7 +53,7 @@ class FbaBuddyBillingLedgerService:
         """
         return await paging_data(
             db,
-            await fba_buddy_billing_ledger_dao.get_select(
+            await ai_buddy_billing_ledger_dao.get_select(
                 user_id=user_id,
                 conversation_id=conversation_id,
                 provider_id=provider_id,
@@ -71,7 +71,7 @@ class FbaBuddyBillingLedgerService:
         user_id: int | None = None,
         start_time: datetime | None = None,
         end_time: datetime | None = None,
-    ) -> GetFbaBuddyBillingSummaryDetail:
+    ) -> GetAIBuddyBillingSummaryDetail:
         """
         获取用量汇总
 
@@ -81,13 +81,13 @@ class FbaBuddyBillingLedgerService:
         :param end_time: 结束时间
         :return:
         """
-        summary = await fba_buddy_billing_ledger_dao.get_summary(
+        summary = await ai_buddy_billing_ledger_dao.get_summary(
             db,
             user_id=user_id,
             start_time=start_time,
             end_time=end_time,
         )
-        return GetFbaBuddyBillingSummaryDetail(
+        return GetAIBuddyBillingSummaryDetail(
             start_time=start_time,
             end_time=end_time,
             usage_count=summary['usage_count'],
@@ -100,7 +100,7 @@ class FbaBuddyBillingLedgerService:
             billed_cost=summary['billed_cost'],
         )
 
-    async def reconcile(self, *, db: AsyncSession, limit: int = 500) -> GetFbaBuddyBillingReconcileDetail:
+    async def reconcile(self, *, db: AsyncSession, limit: int = 500) -> GetAIBuddyBillingReconcileDetail:
         """
         归集 AI Buddy 消息用量并扣减账户余额
 
@@ -108,7 +108,7 @@ class FbaBuddyBillingLedgerService:
         :param limit: 单次扫描消息数量
         :return:
         """
-        rows = await fba_buddy_billing_usage_source_dao.get_list(db, limit=limit)
+        rows = await ai_buddy_billing_usage_source_dao.get_list(db, limit=limit)
         recorded = 0
         billed = 0
         unpriced = 0
@@ -120,9 +120,9 @@ class FbaBuddyBillingLedgerService:
                 fallback_time=message.created_time,
             )
             if not records:
-                await fba_buddy_billing_ledger_dao.create(
+                await ai_buddy_billing_ledger_dao.create(
                     db,
-                    CreateFbaBuddyBillingLedgerParam(
+                    CreateAIBuddyBillingLedgerParam(
                         source_message_id=message.id,
                         source_response_index=0,
                         user_id=user_id,
@@ -130,23 +130,23 @@ class FbaBuddyBillingLedgerService:
                         provider_id=message.provider_id,
                         model_id=message.model_id,
                         usage_time=message.created_time,
-                        status=FbaBuddyBillingLedgerStatus.unpriced.value,
+                        status=AIBuddyBillingLedgerStatus.unpriced.value,
                     ),
                 )
                 recorded += 1
                 unpriced += 1
                 continue
             for record in records:
-                price = await fba_buddy_billing_price_dao.get_active(
+                price = await ai_buddy_billing_price_dao.get_active(
                     db,
                     provider_id=message.provider_id,
                     model_id=record.model_id,
                     effective_time=record.usage_time,
                 )
                 billed_cost, status, price_id = self._resolve_cost(record=record, price=price)
-                ledger = await fba_buddy_billing_ledger_dao.create(
+                ledger = await ai_buddy_billing_ledger_dao.create(
                     db,
-                    CreateFbaBuddyBillingLedgerParam(
+                    CreateAIBuddyBillingLedgerParam(
                         source_message_id=message.id,
                         source_response_index=record.response_index,
                         user_id=user_id,
@@ -170,7 +170,7 @@ class FbaBuddyBillingLedgerService:
                     ),
                 )
                 recorded += 1
-                if status == FbaBuddyBillingLedgerStatus.unpriced:
+                if status == AIBuddyBillingLedgerStatus.unpriced:
                     unpriced += 1
                 else:
                     billed += 1
@@ -181,7 +181,7 @@ class FbaBuddyBillingLedgerService:
                         ledger=ledger,
                         billed_cost=billed_cost,
                     )
-        return GetFbaBuddyBillingReconcileDetail(
+        return GetAIBuddyBillingReconcileDetail(
             processed=len(rows),
             recorded=recorded,
             billed=billed,
@@ -192,8 +192,8 @@ class FbaBuddyBillingLedgerService:
     def _resolve_cost(
         *,
         record: BillingUsageRecord,
-        price: FbaBuddyBillingPrice | None,
-    ) -> tuple[Decimal, FbaBuddyBillingLedgerStatus, int | None]:
+        price: AIBuddyBillingPrice | None,
+    ) -> tuple[Decimal, AIBuddyBillingLedgerStatus, int | None]:
         """
         解析单次用量的结算费用
 
@@ -213,21 +213,21 @@ class FbaBuddyBillingLedgerService:
             }
             billed_cost = calculate_token_cost(usage=record, rates=rates)
             billed_cost += Decimal(record.generated_images) * price.image_price
-            return billed_cost.quantize(Decimal('0.00000001')), FbaBuddyBillingLedgerStatus.billed, price.id
+            return billed_cost.quantize(Decimal('0.00000001')), AIBuddyBillingLedgerStatus.billed, price.id
         if record.provider_cost is not None:
             return (
                 max(record.provider_cost, Decimal(0)).quantize(Decimal('0.00000001')),
-                FbaBuddyBillingLedgerStatus.provider_cost,
+                AIBuddyBillingLedgerStatus.provider_cost,
                 None,
             )
-        return Decimal(0), FbaBuddyBillingLedgerStatus.unpriced, None
+        return Decimal(0), AIBuddyBillingLedgerStatus.unpriced, None
 
     @staticmethod
     async def _charge_usage(
         *,
         db: AsyncSession,
         user_id: int,
-        ledger: FbaBuddyBillingLedger,
+        ledger: AIBuddyBillingLedger,
         billed_cost: Decimal,
     ) -> None:
         """
@@ -239,14 +239,14 @@ class FbaBuddyBillingLedgerService:
         :param billed_cost: 结算费用
         :return:
         """
-        account = await fba_buddy_billing_account_dao.get_by_user_for_update(db, user_id)
+        account = await ai_buddy_billing_account_dao.get_by_user_for_update(db, user_id)
         if account is None:
-            account = await fba_buddy_billing_account_dao.create(
+            account = await ai_buddy_billing_account_dao.create(
                 db,
-                CreateFbaBuddyBillingAccountParam(user_id=user_id),
+                CreateAIBuddyBillingAccountParam(user_id=user_id),
             )
         balance_after = account.balance - billed_cost
-        updated = await fba_buddy_billing_account_dao.update_balance(
+        updated = await ai_buddy_billing_account_dao.update_balance(
             db,
             pk=account.id,
             balance=balance_after,
@@ -254,12 +254,12 @@ class FbaBuddyBillingLedgerService:
         )
         if not updated:
             raise errors.ConflictError(msg='计费账户已变更，请重新归集')
-        await fba_buddy_billing_transaction_dao.create(
+        await ai_buddy_billing_transaction_dao.create(
             db,
-            CreateFbaBuddyBillingTransactionParam(
+            CreateAIBuddyBillingTransactionParam(
                 account_id=account.id,
                 user_id=user_id,
-                transaction_type=FbaBuddyBillingTransactionType.consume.value,
+                transaction_type=AIBuddyBillingTransactionType.consume.value,
                 amount=-billed_cost,
                 balance_after=balance_after,
                 currency=account.currency,
@@ -269,4 +269,4 @@ class FbaBuddyBillingLedgerService:
         )
 
 
-fba_buddy_billing_ledger_service: FbaBuddyBillingLedgerService = FbaBuddyBillingLedgerService()
+ai_buddy_billing_ledger_service: AIBuddyBillingLedgerService = AIBuddyBillingLedgerService()

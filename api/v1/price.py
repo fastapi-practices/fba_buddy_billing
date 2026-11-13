@@ -1,19 +1,24 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 
 from backend.common.pagination import DependsPagination, PageData
-from backend.common.response.response_schema import ResponseSchemaModel, response_base
+from backend.common.response.response_schema import (
+    ResponseModel,
+    ResponseSchemaModel,
+    response_base,
+)
 from backend.common.security.jwt import DependsJwtAuth
 from backend.common.security.permission import RequestPermission
 from backend.common.security.rbac import DependsRBAC
 from backend.database.db import CurrentSession, CurrentSessionTransaction
-from backend.plugin.fba_buddy_billing.schema.price import (
-    CreateFbaBuddyBillingPriceParam,
-    FbaBuddyBillingPriceQueryParam,
-    GetFbaBuddyBillingPriceDetail,
+from backend.plugin.ai_buddy_billing.schema.price import (
+    AIBuddyBillingPriceQueryParam,
+    CreateAIBuddyBillingPriceParam,
+    GetAIBuddyBillingPriceDetail,
+    UpdateAIBuddyBillingPriceParam,
 )
-from backend.plugin.fba_buddy_billing.service.price_service import fba_buddy_billing_price_service
+from backend.plugin.ai_buddy_billing.service.price_service import ai_buddy_billing_price_service
 
 router = APIRouter()
 
@@ -23,11 +28,11 @@ router = APIRouter()
     summary='获取当前生效的 AI Buddy 模型价格',
     dependencies=[DependsJwtAuth],
 )
-async def get_active_fba_buddy_billing_prices(
+async def get_active_ai_buddy_billing_prices(
     db: CurrentSession,
-    query: Annotated[FbaBuddyBillingPriceQueryParam, Query()],
-) -> ResponseSchemaModel[list[GetFbaBuddyBillingPriceDetail]]:
-    data = await fba_buddy_billing_price_service.get_all(
+    query: Annotated[AIBuddyBillingPriceQueryParam, Query()],
+) -> ResponseSchemaModel[list[GetAIBuddyBillingPriceDetail]]:
+    data = await ai_buddy_billing_price_service.get_all(
         db=db,
         provider_id=query.provider_id,
         model_id=query.model_id,
@@ -43,11 +48,11 @@ async def get_active_fba_buddy_billing_prices(
         DependsPagination,
     ],
 )
-async def get_fba_buddy_billing_prices_paginated(
+async def get_ai_buddy_billing_prices_paginated(
     db: CurrentSession,
-    query: Annotated[FbaBuddyBillingPriceQueryParam, Query()],
-) -> ResponseSchemaModel[PageData[GetFbaBuddyBillingPriceDetail]]:
-    data = await fba_buddy_billing_price_service.get_list(
+    query: Annotated[AIBuddyBillingPriceQueryParam, Query()],
+) -> ResponseSchemaModel[PageData[GetAIBuddyBillingPriceDetail]]:
+    data = await ai_buddy_billing_price_service.get_list(
         db=db,
         provider_id=query.provider_id,
         model_id=query.model_id,
@@ -64,9 +69,42 @@ async def get_fba_buddy_billing_prices_paginated(
         DependsRBAC,
     ],
 )
-async def create_fba_buddy_billing_price(
+async def create_ai_buddy_billing_price(
     db: CurrentSessionTransaction,
-    obj: CreateFbaBuddyBillingPriceParam,
-) -> ResponseSchemaModel[GetFbaBuddyBillingPriceDetail]:
-    data = await fba_buddy_billing_price_service.create(db=db, obj=obj)
+    obj: CreateAIBuddyBillingPriceParam,
+) -> ResponseSchemaModel[GetAIBuddyBillingPriceDetail]:
+    data = await ai_buddy_billing_price_service.create(db=db, obj=obj)
     return response_base.success(data=data)
+
+
+@router.put(
+    '/{pk}',
+    summary='更新 AI Buddy 模型价格',
+    dependencies=[
+        Depends(RequestPermission('ai:billing:price:edit')),
+        DependsRBAC,
+    ],
+)
+async def update_ai_buddy_billing_price(
+    db: CurrentSessionTransaction,
+    pk: Annotated[int, Path(description='价格 ID')],
+    obj: UpdateAIBuddyBillingPriceParam,
+) -> ResponseSchemaModel[GetAIBuddyBillingPriceDetail]:
+    data = await ai_buddy_billing_price_service.update(db=db, pk=pk, obj=obj)
+    return response_base.success(data=data)
+
+
+@router.delete(
+    '/{pk}',
+    summary='删除 AI Buddy 模型价格',
+    dependencies=[
+        Depends(RequestPermission('ai:billing:price:del')),
+        DependsRBAC,
+    ],
+)
+async def delete_ai_buddy_billing_price(
+    db: CurrentSessionTransaction,
+    pk: Annotated[int, Path(description='价格 ID')],
+) -> ResponseModel:
+    await ai_buddy_billing_price_service.delete(db=db, pk=pk)
+    return response_base.success()

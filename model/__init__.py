@@ -1,5 +1,5 @@
-from backend.plugin.fba_buddy_billing.model.account import FbaBuddyBillingAccount as FbaBuddyBillingAccount
-from backend.plugin.fba_buddy_billing.model.budget import FbaBuddyBillingBudget as FbaBuddyBillingBudget
-from backend.plugin.fba_buddy_billing.model.ledger import FbaBuddyBillingLedger as FbaBuddyBillingLedger
-from backend.plugin.fba_buddy_billing.model.price import FbaBuddyBillingPrice as FbaBuddyBillingPrice
-from backend.plugin.fba_buddy_billing.model.transaction import FbaBuddyBillingTransaction as FbaBuddyBillingTransaction
+from backend.plugin.ai_buddy_billing.model.account import AIBuddyBillingAccount as AIBuddyBillingAccount
+from backend.plugin.ai_buddy_billing.model.budget import AIBuddyBillingBudget as AIBuddyBillingBudget
+from backend.plugin.ai_buddy_billing.model.ledger import AIBuddyBillingLedger as AIBuddyBillingLedger
+from backend.plugin.ai_buddy_billing.model.price import AIBuddyBillingPrice as AIBuddyBillingPrice
+from backend.plugin.ai_buddy_billing.model.transaction import AIBuddyBillingTransaction as AIBuddyBillingTransaction

@@ -5,15 +5,15 @@ from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
-from backend.plugin.fba_buddy_billing.model import FbaBuddyBillingBudget
-from backend.plugin.fba_buddy_billing.schema.budget import CreateFbaBuddyBillingBudgetParam
+from backend.plugin.ai_buddy_billing.model import AIBuddyBillingBudget
+from backend.plugin.ai_buddy_billing.schema.budget import CreateAIBuddyBillingBudgetParam
 from backend.utils.timezone import timezone
 
 
-class CRUDFbaBuddyBillingBudget(CRUDPlus[FbaBuddyBillingBudget]):
+class CRUDAIBuddyBillingBudget(CRUDPlus[AIBuddyBillingBudget]):
     """AI Buddy 计费预算数据库操作类"""
 
-    async def get(self, db: AsyncSession, pk: int) -> FbaBuddyBillingBudget | None:
+    async def get(self, db: AsyncSession, pk: int) -> AIBuddyBillingBudget | None:
         """
         获取预算记录
 
@@ -52,7 +52,7 @@ class CRUDFbaBuddyBillingBudget(CRUDPlus[FbaBuddyBillingBudget]):
         db: AsyncSession,
         *,
         user_id: int,
-    ) -> Sequence[FbaBuddyBillingBudget]:
+    ) -> Sequence[AIBuddyBillingBudget]:
         """
         获取用户启用的预算
 
@@ -75,7 +75,7 @@ class CRUDFbaBuddyBillingBudget(CRUDPlus[FbaBuddyBillingBudget]):
         *,
         user_id: int,
         window: str,
-    ) -> FbaBuddyBillingBudget | None:
+    ) -> AIBuddyBillingBudget | None:
         """
         获取用户指定窗口的预算
 
@@ -86,7 +86,7 @@ class CRUDFbaBuddyBillingBudget(CRUDPlus[FbaBuddyBillingBudget]):
         """
         return await self.select_model_by_column(db, user_id=user_id, window=window, deleted=0)
 
-    async def create(self, db: AsyncSession, obj: CreateFbaBuddyBillingBudgetParam) -> FbaBuddyBillingBudget:
+    async def create(self, db: AsyncSession, obj: CreateAIBuddyBillingBudgetParam) -> AIBuddyBillingBudget:
         """
         创建预算记录
 
@@ -127,4 +127,4 @@ class CRUDFbaBuddyBillingBudget(CRUDPlus[FbaBuddyBillingBudget]):
         )
 
 
-fba_buddy_billing_budget_dao: CRUDFbaBuddyBillingBudget = CRUDFbaBuddyBillingBudget(FbaBuddyBillingBudget)
+ai_buddy_billing_budget_dao: CRUDAIBuddyBillingBudget = CRUDAIBuddyBillingBudget(AIBuddyBillingBudget)

@@ -8,12 +8,12 @@ from backend.common.enums import StatusType
 from backend.common.model import Base, id_key
 
 
-class FbaBuddyBillingBudget(Base):
+class AIBuddyBillingBudget(Base):
     """AI Buddy 计费预算表"""
 
-    __tablename__ = 'fba_buddy_billing_budget'
+    __tablename__ = 'ai_buddy_billing_budget'
     __table_args__ = (
-        sa.UniqueConstraint('user_id', 'window', 'deleted', name='uk_fba_buddy_billing_budget_user_window_deleted'),
+        sa.UniqueConstraint('user_id', 'window', 'deleted', name='uk_ai_buddy_billing_budget_user_window_deleted'),
         {'comment': 'AI Buddy 计费预算'},
     )
 

@@ -6,7 +6,13 @@ from pydantic import ConfigDict, Field
 from backend.common.schema import SchemaBase
 
 
-class CreateFbaBuddyBillingRechargeParam(SchemaBase):
+class AIBuddyBillingAccountQueryParam(SchemaBase):
+    """AI Buddy 计费账户查询参数"""
+
+    user_id: int | None = Field(None, description='用户 ID')
+
+
+class CreateAIBuddyBillingRechargeParam(SchemaBase):
     """AI Buddy 计费账户充值参数"""
 
     user_id: int = Field(description='用户 ID')
@@ -14,7 +20,7 @@ class CreateFbaBuddyBillingRechargeParam(SchemaBase):
     remark: str | None = Field(None, max_length=500, description='备注')
 
 
-class CreateFbaBuddyBillingAdjustmentParam(SchemaBase):
+class CreateAIBuddyBillingAdjustmentParam(SchemaBase):
     """AI Buddy 计费账户调整参数"""
 
     user_id: int = Field(description='用户 ID')
@@ -22,7 +28,7 @@ class CreateFbaBuddyBillingAdjustmentParam(SchemaBase):
     remark: str | None = Field(None, max_length=500, description='备注')
 
 
-class GetFbaBuddyBillingAccountDetail(SchemaBase):
+class GetAIBuddyBillingAccountDetail(SchemaBase):
     """AI Buddy 计费账户详情"""
 
     model_config = ConfigDict(from_attributes=True)
@@ -36,7 +42,7 @@ class GetFbaBuddyBillingAccountDetail(SchemaBase):
     updated_time: datetime | None = Field(None, description='更新时间')
 
 
-class CreateFbaBuddyBillingAccountParam(SchemaBase):
+class CreateAIBuddyBillingAccountParam(SchemaBase):
     """创建 AI Buddy 计费账户参数"""
 
     user_id: int = Field(description='用户 ID')

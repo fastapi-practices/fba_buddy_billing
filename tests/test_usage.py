@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from decimal import Decimal
 
-from backend.plugin.fba_buddy_billing.utils.usage import calculate_token_cost, extract_usage_records
+from backend.plugin.ai_buddy_billing.utils.usage import calculate_token_cost, extract_usage_records
 
 
 def test_extract_usage_records() -> None:
