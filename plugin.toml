@@ -1,0 +1,12 @@
+[plugin]
+icon = "https://wu-clan.github.io/picx-images-hosting/logo/fba.svg"
+summary = "AI Buddy Billing"
+version = "0.1.0"
+fba_version = ">=2.0.0,<3.0.0"
+description = "为 AI Buddy 提供模型价格、用量账本、用户余额、充值调整和账单归集"
+author = "wu-clan"
+tags = ["ai", "payment"]
+depends_on = ["ai_buddy"]
+
+[app]
+router = ["v1"]
