@@ -40,6 +40,7 @@ AI_BUDDY_BILLING_BALANCE_GUARD_SKIP_SUPERUSER: bool = False
 ## 使用方式
 
 1. 安装并启用 AI Buddy 插件和本插件后重启后端服务
+   - 本插件在系统根级创建独立的“AI Buddy 计费”菜单（`/plugins/ai-buddy-billing`），与 AI Buddy 菜单平级，不挂在 AI Buddy 下
 2. 按供应商和模型维护 token 单价、图片单价及生效时间，新价格会自动关闭上一版价格
 3. 可修改价格单价或设置失效时间；未被账本使用的价格可以直接删除，已参与结算的价格只能失效
 4. 通过账户列表查询用户余额，并按用户充值或调整余额
