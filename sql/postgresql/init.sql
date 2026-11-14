@@ -3,7 +3,7 @@ declare
     billing_menu_id bigint;
 begin
     insert into sys_menu (title, name, path, sort, icon, type, component, perms, status, display, cache, link, remark, parent_id, created_time, updated_time)
-    values ('AI Buddy 计费', 'AIBuddyBillingManage', '/plugins/ai-buddy-billing', 14, 'material-symbols:payments-outline', 1, '/plugins/ai-buddy-billing/views/index', null, 1, 1, 1, '', null, null, now(), null)
+    values ('ai-buddy-billing.menu', 'AIBuddyBillingManage', '/plugins/ai-buddy-billing', 14, 'material-symbols:payments-outline', 1, '/plugins/ai-buddy-billing/views/index', null, 1, 1, 1, '', null, null, now(), null)
     returning id into billing_menu_id;
 
     insert into sys_menu (title, name, path, sort, icon, type, component, perms, status, display, cache, link, remark, parent_id, created_time, updated_time)
